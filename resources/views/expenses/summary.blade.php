@@ -142,13 +142,13 @@
                 @endif
             @endif
 
-            @role('caretaker|admin')
+            @can('expenses.create')
                 <div class="flex justify-end mb-4">
                     <a href="{{ route('expenses.create') }}" class="btn btn-success font-bold">
                         Nuevo Gasto
                     </a>
                 </div>
-            @endrole
+            @endcan
 
         </div>
     </div>

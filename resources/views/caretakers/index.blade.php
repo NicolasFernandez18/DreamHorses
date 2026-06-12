@@ -52,10 +52,12 @@
                                 <td class="p-4">{{ $caretaker->phone }}</td>
                                 <td class="p-4">{{ $caretaker->address }}</td>
                                 <td class="p-4 flex gap-2">
-                                    <a href="{{ route('caretakers.show', $caretaker->id) }}"
-                                        class="btn btn-xs btn-info">
-                                        Ver caballos
-                                    </a>
+                                    @can('caretakers.show')
+                                        <a href="{{ route('caretakers.show', $caretaker->id) }}"
+                                            class="btn btn-xs btn-info">
+                                            Ver caballos
+                                        </a>
+                                    @endcan
                                 </td>
                             </tr>
                         @endforeach

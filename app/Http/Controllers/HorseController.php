@@ -17,6 +17,29 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class HorseController extends Controller
 {
+    private function selectableCaretakers(?User $user)
+    {
+        if (! $user) {
+            return collect();
+        }
+
+        if ($user->hasRole('admin')) {
+            return User::role('caretaker')->get();
+        }
+
+        if ($user->hasRole('boss')) {
+            return User::whereHas('studs', function ($query) use ($user) {
+                $query->whereIn('stud_id', $user->acceptedContractedStuds->pluck('id'));
+            })->role('caretaker')->get();
+        }
+
+        if ($user->hasRole('caretaker')) {
+            return collect([$user]);
+        }
+
+        return User::role('caretaker')->get();
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -38,7 +61,9 @@ public function index()
             })
             ->latest()
             ->paginate(6);
-    } 
+    } else {
+        $horses = Horse::with(['boss', 'caretaker'])->latest()->paginate(6);
+    }
 
     return view('Horse.index', compact('horses'));
 }
@@ -51,18 +76,10 @@ public function index()
     public function create()
     {
         /** @var \App\Models\User $user */
-$user = Auth::user();
+        $user = Auth::user();
+        $caretakers = $this->selectableCaretakers($user);
 
-if ($user->hasRole('admin')) {
-    $caretakers = User::role('caretaker')->get();
-} elseif ($user->hasRole('boss')) {
-    $caretakers = User::whereHas('studs', function ($q) use ($user) {
-        $q->whereIn('stud_id', $user->acceptedContractedStuds->pluck('id'));
-    })->role('caretaker')->get();
-} else {
-    $caretakers = collect(); 
-}  return view('Horse.create', compact('caretakers'));
-
+        return view('Horse.create', compact('caretakers'));
     }
 
 
@@ -86,9 +103,7 @@ if ($user->hasRole('admin')) {
 
     if ($user->hasRole('caretaker')) {
         $data['caretaker_id'] = $user->id;
-    }
-
-    if ($user->hasRole('boss') && $request->filled('caretaker_id')) {
+    } elseif ($request->filled('caretaker_id')) {
         $data['caretaker_id'] = $request->input('caretaker_id');
     }
 
@@ -120,21 +135,7 @@ if ($user->hasRole('admin')) {
 {
     /** @var \App\Models\User $user */
      $user = Auth::user();
-
-    if ($user->hasRole('admin')) {
-        $caretakers = User::role('caretaker')->get();
-    }
-    elseif ($user->hasRole('boss')) {
-        $caretakers = User::whereHas('studs', function ($q) use ($user) {
-            $q->whereIn('stud_id', $user->acceptedContractedStuds->pluck('id'));
-        })->role('caretaker')->get();
-    }
-    elseif ($user->hasRole('caretaker')) {
-        $caretakers = collect([$user]);
-    }
-    else {
-        $caretakers = collect();
-    }
+    $caretakers = $this->selectableCaretakers($user);
 
     return view('Horse.edit', compact('horse', 'caretakers'));
 }

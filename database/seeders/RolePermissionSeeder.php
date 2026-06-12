@@ -2,12 +2,13 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\PermissionRegistrar;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use App\Support\PermissionCatalog;
 
 
 class RolePermissionSeeder extends Seeder
@@ -17,129 +18,63 @@ class RolePermissionSeeder extends Seeder
      */
     public function run(): void
     {
-        // Create roles
-        $bossRole = Role::create(['name' => 'boss']);
-        $caretakersRole = Role::create(['name' => 'caretaker']);
-        $adminRole = Role::create(['name' => 'admin']);
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        // Create admin user
-        $adminUser = User::create([
-            'name' => 'admin',
-            'email' => 'admin@example.com',
-            'password' => Hash::make('admin123'),
-            'phone' => '123456789',
-            'address' => 'Admin Address',
-            'email_verified_at' => now(),
-        ]);
-          $Userboss = User::create([
-            'name' => 'boss',
-            'email' => 'boss@example.com',
-            'password' => Hash::make('boss123'),
-            'phone' => '123456789',
-            'address' => 'Boss Address',
-            'email_verified_at' => now(),
-        ]);
-          $Usercaretaker = User::create([
-            'name' => 'caretaker',
-            'email' => 'caretaker@example.com',
-            'password' => Hash::make('caretaker123'),
-            'phone' => '123456789',
-            'address' => 'Caretaker Address',
-            'email_verified_at' => now(),
-        ]);
+        $permissions = [];
 
+        foreach (PermissionCatalog::sections() as $section) {
+            foreach ($section as $permissionName => $label) {
+                $permissions[$permissionName] = Permission::firstOrCreate(
+                    ['name' => $permissionName, 'guard_name' => 'web']
+                );
+            }
+        }
 
-        $adminUser->assignRole($adminRole);
-        $Userboss->assignRole($bossRole);
-        $Usercaretaker->assignRole($caretakersRole);
+        $roles = [];
+        foreach (['admin', 'boss', 'caretaker'] as $roleName) {
+            $roles[$roleName] = Role::firstOrCreate(
+                ['name' => $roleName, 'guard_name' => 'web']
+            );
+            $roles[$roleName]->syncPermissions(PermissionCatalog::rolePermissions()[$roleName]);
+        }
 
-        // horse permissions
-        /* $createHorsePermission = Permission::create(['name' => 'create horse']);
-        $editHorsePermission = Permission::create(['name' => 'edit horse']);
-        $deleteHorsePermission = Permission::create(['name' => 'delete horse']);
-        $viewHorsePermission = Permission::create(['name' => 'view horse']);
-        
-        //Race permissions
-        $createRacePermission = Permission::create(['name' => 'create race']);
-        $editRacePermission = Permission::create(['name' => 'edit race']);
-        $deleteRacePermission = Permission::create(['name' => 'delete race']);
-        $viewRacePermission = Permission::create(['name' => 'view race']);
+        $adminUser = User::updateOrCreate(
+            ['email' => 'admin@example.com'],
+            [
+                'name' => 'admin',
+                'password' => Hash::make('admin123'),
+                'phone' => '123456789',
+                'address' => 'Admin Address',
+                'email_verified_at' => now(),
+            ]
+        );
 
-        // VetVisit permissions
+        $bossUser = User::updateOrCreate(
+            ['email' => 'boss@example.com'],
+            [
+                'name' => 'boss',
+                'password' => Hash::make('boss123'),
+                'phone' => '123456789',
+                'address' => 'Boss Address',
+                'email_verified_at' => now(),
+            ]
+        );
 
-        $createVetVisitPermission = Permission::create(['name' => 'create vetvisit']);
-        $editVetVisitPermission = Permission::create(['name' => 'edit vetvisit']);
-        $deleteVetVisitPermission = Permission::create(['name' => 'delete vetvisit']);
-        $viewVetVisitPermission = Permission::create(['name' => 'view vetvisit']);
+        $caretakerUser = User::updateOrCreate(
+            ['email' => 'caretaker@example.com'],
+            [
+                'name' => 'caretaker',
+                'password' => Hash::make('caretaker123'),
+                'phone' => '123456789',
+                'address' => 'Caretaker Address',
+                'email_verified_at' => now(),
+            ]
+        );
 
-        // Calendar permissions
+        $adminUser->syncRoles([$roles['admin']]);
+        $bossUser->syncRoles([$roles['boss']]);
+        $caretakerUser->syncRoles([$roles['caretaker']]);
 
-        $createCalendarPermission = Permission::create(['name' => 'create calendar']);
-        $editCalendarPermission = Permission::create(['name' => 'edit calendar']);
-        $deleteCalendarPermission = Permission::create(['name' => 'delete calendar']);
-        $viewCalendarPermission = Permission::create(['name' => 'view calendar']);
-
-        // expense permissions
-
-        $createExpensePermission = Permission::create(['name' => 'create expense']);
-        $editExpensePermission = Permission::create(['name' => 'edit expense']);
-        $deleteExpensePermission = Permission::create(['name' => 'delete expense']);
-        $viewExpensePermission = Permission::create(['name' => 'view expense']);
-
-        // training permissions
-
-        $createTrainingPermission = Permission::create(['name' => 'create training']);
-        $editTrainingPermission = Permission::create(['name' => 'edit training']);
-        $deleteTrainingPermission = Permission::create(['name' => 'delete training']);
-        $viewTrainingPermission = Permission::create(['name' => 'view training']);
-
-        // Assign permissions to roles
-        $bossRole->givePermissionTo([ 
-            $createHorsePermission, 
-            $viewHorsePermission,
-            $viewRacePermission,
-            $viewVetVisitPermission,
-            $viewCalendarPermission,
-            $viewTrainingPermission,
-            
-
-        ]);
-
-
-        $caretakersRole->givePermissionTo([ 
-            $createHorsePermission, 
-            $editHorsePermission, 
-            $deleteHorsePermission, 
-            $viewHorsePermission,
-            $createTrainingPermission,
-            $viewTrainingPermission,
-            $editTrainingPermission,
-            $deleteTrainingPermission,
-            $createCalendarPermission,
-            $viewCalendarPermission,
-            $editCalendarPermission,
-            $deleteCalendarPermission,
-            $createExpensePermission,
-            $viewExpensePermission,
-            $editExpensePermission,
-            $deleteExpensePermission,
-            $viewVetVisitPermission,
-            $createRacePermission,
-            $editRacePermission,
-            $deleteRacePermission,
-            $viewRacePermission
-        ]);
-
-
-        $veterinariansRole->givePermissionTo([ 
-            $viewHorsePermission,
-            $createVetVisitPermission,
-            $viewVetVisitPermission,
-            $editVetVisitPermission,
-            $deleteVetVisitPermission,
-            $viewCalendarPermission,
-            $viewTrainingPermission,
-
-        ]);*/
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 }

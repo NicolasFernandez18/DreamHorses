@@ -54,7 +54,7 @@
 
                             <div class="flex gap-2">
                                 @if (auth()->id() === $stud->owner_id && $caretaker->id !== $stud->owner_id)
-                                    @role('caretaker|admin')
+                                    @can('studs.kick')
                                         <button class="btn btn-xs btn-error"
                                             onclick="document.getElementById('modal_kick_{{ $caretaker->id }}').showModal()">Despedir</button>
                                         <dialog id="modal_kick_{{ $caretaker->id }}" class="modal">
@@ -78,28 +78,30 @@
                                                 <button>close</button>
                                             </form>
                                         </dialog>
-                                    @endrole
+                                    @endcan
                                 @elseif(auth()->id() === $caretaker->id && $caretaker->id !== $stud->owner_id)
-                                    <button class="btn btn-xs btn-warning"
-                                        onclick="document.getElementById('modal_leave_{{ $stud->id }}').showModal()">Renunciar</button>
-                                    <dialog id="modal_leave_{{ $stud->id }}" class="modal">
-                                        <div class="modal-box">
-                                            <h3 class="font-bold text-lg">Confirmar Renuncia</h3>
-                                            <p class="py-4">¿Estás seguro de que deseas renunciar a este stud?</p>
-                                            <div class="modal-action">
-                                                <form method="dialog">
-                                                    <button class="btn">Cancelar</button>
-                                                </form>
-                                                <form action="{{ route('studs.leave', $stud->id) }}" method="POST">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-warning">Renunciar</button>
-                                                </form>
+                                    @can('studs.leave')
+                                        <button class="btn btn-xs btn-warning"
+                                            onclick="document.getElementById('modal_leave_{{ $stud->id }}').showModal()">Renunciar</button>
+                                        <dialog id="modal_leave_{{ $stud->id }}" class="modal">
+                                            <div class="modal-box">
+                                                <h3 class="font-bold text-lg">Confirmar Renuncia</h3>
+                                                <p class="py-4">¿Estás seguro de que deseas renunciar a este stud?</p>
+                                                <div class="modal-action">
+                                                    <form method="dialog">
+                                                        <button class="btn">Cancelar</button>
+                                                    </form>
+                                                    <form action="{{ route('studs.leave', $stud->id) }}" method="POST">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-warning">Renunciar</button>
+                                                    </form>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <form method="dialog" class="modal-backdrop">
-                                            <button>Cancelar</button>
-                                        </form>
-                                    </dialog>
+                                            <form method="dialog" class="modal-backdrop">
+                                                <button>Cancelar</button>
+                                            </form>
+                                        </dialog>
+                                    @endcan
                                 @endif
                             </div>
                         </div>
@@ -108,9 +110,9 @@
                     @endforelse
                 </div>
 
-                @if(Auth::id() === $stud->owner_id)
-                <div class="card bg-base-200 shadow-xl p-6">
-                    <h2 class="text-xl font-semibold mb-4 text-base-content">Solicitudes de Contrato Pendientes</h2>
+                @if(Auth::id() === $stud->owner_id && auth()->user()?->can('studs.respond'))
+                    <div class="card bg-base-200 shadow-xl p-6">
+                        <h2 class="text-xl font-semibold mb-4 text-base-content">Solicitudes de Contrato Pendientes</h2>
 
                     @forelse($stud->pendingBosses as $boss)
                         <div class="flex justify-between items-center bg-base-100 p-3 rounded-lg shadow-sm mb-2">
@@ -131,7 +133,7 @@
                     @empty
                         <p class="text-sm text-base-content/70">No hay solicitudes de contrato pendientes.</p>
                     @endforelse
-                </div>
+                    </div>
                 @endif
 
                 <div class="flex justify-between">

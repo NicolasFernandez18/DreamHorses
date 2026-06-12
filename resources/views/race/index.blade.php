@@ -38,13 +38,13 @@
                     Lista de Carreras
                 </h1>
                 <x-session-alert />
-                @role('caretaker|admin')
+                @can('race.create')
                     <div class="flex justify-start">
                         <a href="{{ route('race.create') }}"
                             class="btn btn-success font-bold shadow-sm">Crear
                             Carrera</a>
                     </div>
-                @endrole
+                @endcan
                   <div class="p-6 md:p-2">
                  @if($horseId)
         <a href="{{ route('horses.show', $horseId) }}" 
@@ -77,9 +77,9 @@
                             <th class="p-4">Distancia</th>
                             <th class="p-4">Descripción de la Carrera</th>
                             <th class="p-4">Jockey</th>
-                            @role('caretaker|admin')
+                            @canany(['race.edit', 'race.delete'])
                                 <th class="p-4">Acciones</th>
-                            @endrole
+                            @endcanany
                         </tr>
                     </thead>
                     <tbody>
@@ -101,16 +101,20 @@
                             <td class="p-4 whitespace-nowrap">{{ $race->distance }}Mt</td>
                                 <td class="p-4 max-w-xs break-words">{{ $race->description }}</td>
                                 <td class="p-4 whitespace-nowrap">{{ $race->jockey }}</td>
-                                <td class="p-4 flex flex-col sm:flex-row gap-2">
-                                    @role('caretaker|admin')
+                                @canany(['race.edit', 'race.delete'])
+                                    <td class="p-4 flex flex-col sm:flex-row gap-2">
+                                        @can('race.edit')
                                         <a href="{{ route('race.edit', $race->id) }}"
                                             class="btn btn-xs btn-warning">Editar</a>
-                                        <div>
-                                            <button class="btn btn-xs btn-error" onclick="document.getElementById('modal_race_{{ $race->id }}').showModal()">Eliminar</button>
-                                            <x-delete-modal :id="'modal_race_' . $race->id" :action="route('race.destroy', $race->id)" />
-                                        </div>
-                                    @endrole
-                                </td>
+                                        @endcan
+                                        @can('race.delete')
+                                            <div>
+                                                <button class="btn btn-xs btn-error" onclick="document.getElementById('modal_race_{{ $race->id }}').showModal()">Eliminar</button>
+                                                <x-delete-modal :id="'modal_race_' . $race->id" :action="route('race.destroy', $race->id)" />
+                                            </div>
+                                        @endcan
+                                    </td>
+                                @endcanany
                             </tr>
                         @endforeach
                     </tbody>

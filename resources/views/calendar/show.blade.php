@@ -36,13 +36,13 @@
                 Calendario de Eventos
             </h1>
             </div>
-                @role('caretaker|boss|admin')
-                <form action="{{ route('calendar.index') }}" method="get">
-                    <button type="submit" class="btn btn-success font-bold shadow-sm">
-                        lista de Eventos
-                    </button>
+                @if(auth()->user()?->hasAnyRole(['caretaker', 'boss', 'admin']))
+                    <form action="{{ route('calendar.index') }}" method="get">
+                        <button type="submit" class="btn btn-success font-bold shadow-sm">
+                            lista de Eventos
+                        </button>
                     </form>
-                    @endrole
+                @endif
                 </div>
 
         <div class="p-6">

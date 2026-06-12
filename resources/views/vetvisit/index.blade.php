@@ -38,13 +38,13 @@
             <x-session-alert />
 
 
-            @role('caretaker|admin')
-            <div class="mb-4">
-                <a href="{{ route('vet-visits.create') }}" class="btn btn-success font-bold shadow-sm">
-                    Nueva Visita
-                </a>
-            </div>
-            @endrole
+            @can('vet-visits.create')
+                <div class="mb-4">
+                    <a href="{{ route('vet-visits.create') }}" class="btn btn-success font-bold shadow-sm">
+                        Nueva Visita
+                    </a>
+                </div>
+            @endcan
 
             <div class="p-6 md:p-1">
                 @if ($horseId)
@@ -64,9 +64,9 @@
                             <th class="p-4">Diagnóstico</th>
                             <th class="p-4">Tratamiento</th>
                             <th class="p-4">Próxima Visita</th>
-                             @role('caretaker|admin')
-                            <th class="p-4">Acciones</th>
-                             @endrole
+                            @canany(['vet-visits.edit', 'vet-visits.delete'])
+                                <th class="p-4">Acciones</th>
+                            @endcanany
                         </tr>
                     </thead>
                     <tbody>
@@ -79,16 +79,20 @@
                                 <td class="p-4 max-w-xs break-words">{{ $visit->diagnosis }}</td>
                                 <td class="p-4 max-w-xs break-words">{{ $visit->treatment }}</td>
                                 <td class="p-4">{{ $visit->next_visit ? \Carbon\Carbon::parse($visit->next_visit)->format('d/m/Y') : '-' }}</td>
-                                <td class="p-4 flex flex-col sm:flex-row gap-2">
-                                    @role('caretaker|admin')
-                                    <a href="{{ route('vet-visits.edit', $visit->id) }}"
-                                        class="btn btn-xs btn-warning">Editar</a>
-                                    <div>
-                                        <button class="btn btn-xs btn-error" onclick="document.getElementById('modal_visit_{{ $visit->id }}').showModal()">Eliminar</button>
-                                        <x-delete-modal :id="'modal_visit_' . $visit->id" :action="route('vet-visits.destroy', $visit->id)" />
-                                    </div>
-                                    @endrole
-                                </td>
+                                @canany(['vet-visits.edit', 'vet-visits.delete'])
+                                    <td class="p-4 flex flex-col sm:flex-row gap-2">
+                                        @can('vet-visits.edit')
+                                            <a href="{{ route('vet-visits.edit', $visit->id) }}"
+                                                class="btn btn-xs btn-warning">Editar</a>
+                                        @endcan
+                                        @can('vet-visits.delete')
+                                            <div>
+                                                <button class="btn btn-xs btn-error" onclick="document.getElementById('modal_visit_{{ $visit->id }}').showModal()">Eliminar</button>
+                                                <x-delete-modal :id="'modal_visit_' . $visit->id" :action="route('vet-visits.destroy', $visit->id)" />
+                                            </div>
+                                        @endcan
+                                    </td>
+                                @endcanany
                             </tr>
                         @endforeach
                     </tbody>

@@ -37,13 +37,13 @@
             </h2>
 
             <x-session-alert />
-            @role('|boss|admin')
+            @can('horses.create')
                 <div class="mb-4">
                     <a href="{{ route('CreateHorse') }}"
                         class="btn btn-success font-bold shadow-sm">Crear
                         caballo</a>
                 </div>
-            @endrole
+            @endcan
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($horses as $horse)
                     <div

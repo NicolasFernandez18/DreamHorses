@@ -36,12 +36,12 @@
                     Lista de Entrenamientos
                 </h1>
                 <x-session-alert />
-                @role('caretaker|admin')
+                @can('training.create')
                     <div class="flex justify-start">
                         <a href="{{ route('training.create') }}" class="btn btn-success font-bold shadow-sm">Crear
                             Entrenamiento</a>
                     </div>
-                @endrole
+                @endcan
                  <div class="p-6 md:p-2">
                  @if($horseId)
         <a href="{{ route('horses.show', $horseId) }}" 
@@ -59,9 +59,9 @@
                             <th class="p-4">Fecha</th>
                             <th class="p-4">Entrenamiento</th>
                             <th class="p-4">Comentarios</th>
-                            @role('caretaker|admin')
+                            @canany(['training.edit', 'training.delete'])
                                 <th class="p-4">Acciones</th>
-                            @endrole
+                            @endcanany
                         </tr>
                     </thead>
                     <tbody>
@@ -73,16 +73,20 @@
                                 <td class="p-4 whitespace-nowrap">{{ \Carbon\Carbon::parse($training->date)->format('d/m/Y') }}</td>
                                 <td class="p-4 whitespace-nowrap">{{ $training->type_training }}</td>
                                 <td class="p-4 max-w-xs break-words">{{ $training->comments }}</td>
-                                <td class="p-4 flex flex-col md:flex-row gap-2">
-                                    @role('caretaker|admin')
+                                @canany(['training.edit', 'training.delete'])
+                                    <td class="p-4 flex flex-col md:flex-row gap-2">
+                                        @can('training.edit')
                                         <a href="{{ route('training.edit', $training->id) }}"
                                             class="btn btn-xs btn-warning">Editar</a>
-                                        <div>
-                                            <button class="btn btn-xs btn-error" onclick="document.getElementById('modal_training_{{ $training->id }}').showModal()">Eliminar</button>
-                                            <x-delete-modal :id="'modal_training_' . $training->id" :action="route('training.destroy', $training->id)" />
-                                        </div>
-                                    @endrole
-                                </td>
+                                        @endcan
+                                        @can('training.delete')
+                                            <div>
+                                                <button class="btn btn-xs btn-error" onclick="document.getElementById('modal_training_{{ $training->id }}').showModal()">Eliminar</button>
+                                                <x-delete-modal :id="'modal_training_' . $training->id" :action="route('training.destroy', $training->id)" />
+                                            </div>
+                                        @endcan
+                                    </td>
+                                @endcanany
                             </tr>
                         @endforeach
                     </tbody>

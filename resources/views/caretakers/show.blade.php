@@ -63,51 +63,55 @@
                 <div class="bg-base-200 p-6 rounded-lg shadow">
                     <h3 class="text-xl font-semibold mb-4"> Reasignar Caballos</h3>
 
-                    @if ($caretaker->horsesCaretaker->count())
-                        <button class="btn btn-warning font-bold"
-                            onclick="document.getElementById('modal_reassign').showModal()">
-                            Reasignar caballos
-                        </button>
+                    @can('caretakers.reassign')
+                        @if ($caretaker->horsesCaretaker->count())
+                            <button class="btn btn-warning font-bold"
+                                onclick="document.getElementById('modal_reassign').showModal()">
+                                Reasignar caballos
+                            </button>
 
-                        <dialog id="modal_reassign" class="modal">
-                            <div class="modal-box">
-                                <form action="{{ route('caretakers.reassign', $caretaker->id) }}" method="POST"
-                                    class="space-y-4">
-                                    @csrf
-                                    <h3 class="font-bold text-lg">Confirmar Reasignación</h3>
-                                    <p class="py-4">Estás a punto de reasignar todos los caballos de
-                                        {{ $caretaker->name }}. Selecciona el nuevo cuidador y confirma.</p>
+                            <dialog id="modal_reassign" class="modal">
+                                <div class="modal-box">
+                                    <form action="{{ route('caretakers.reassign', $caretaker->id) }}" method="POST"
+                                        class="space-y-4">
+                                        @csrf
+                                        <h3 class="font-bold text-lg">Confirmar Reasignación</h3>
+                                        <p class="py-4">Estás a punto de reasignar todos los caballos de
+                                            {{ $caretaker->name }}. Selecciona el nuevo cuidador y confirma.</p>
 
-                                    <div>
-                                        <label for="new_caretaker_id" class="font-semibold">Nuevo cuidador:</label>
-                                        <select name="new_caretaker_id" required class="select select-bordered w-full">
-                                            <option disabled selected>Seleccione un cuidador</option>
-                                            @foreach ($availableCaretakers as $c)
-                                                <option value="{{ $c->id }}">
-                                                    {{ $c->name }}
-                                                    @if ($c->studs->isNotEmpty())
-                                                        — Studs: {{ $c->studs->pluck('name')->join(', ') }}
-                                                    @endif
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <x-input-error :messages="$errors->get('new_caretaker_id')" class="mt-2" />
-                                    </div>
+                                        <div>
+                                            <label for="new_caretaker_id" class="font-semibold">Nuevo cuidador:</label>
+                                            <select name="new_caretaker_id" required class="select select-bordered w-full">
+                                                <option disabled selected>Seleccione un cuidador</option>
+                                                @foreach ($availableCaretakers as $c)
+                                                    <option value="{{ $c->id }}">
+                                                        {{ $c->name }}
+                                                        @if ($c->studs->isNotEmpty())
+                                                            — Studs: {{ $c->studs->pluck('name')->join(', ') }}
+                                                        @endif
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            <x-input-error :messages="$errors->get('new_caretaker_id')" class="mt-2" />
+                                        </div>
 
-                                    <div class="modal-action justify-end">
-                                        <button type="button" class="btn btn-ghost"
-                                            onclick="document.getElementById('modal_reassign').close()">Cancelar</button>
-                                        <button type="submit" class="btn btn-warning">Confirmar Reasignación</button>
-                                    </div>
+                                        <div class="modal-action justify-end">
+                                            <button type="button" class="btn btn-ghost"
+                                                onclick="document.getElementById('modal_reassign').close()">Cancelar</button>
+                                            <button type="submit" class="btn btn-warning">Confirmar Reasignación</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <form method="dialog" class="modal-backdrop">
+                                    <button>Cancelar</button>
                                 </form>
-                            </div>
-                            <form method="dialog" class="modal-backdrop">
-                                <button>Cancelar</button>
-                            </form>
-                        </dialog>
+                            </dialog>
+                        @else
+                            <p class="text-base-content/70">No hay caballos que reasignar.</p>
+                        @endif
                     @else
-                        <p class="text-base-content/70">No hay caballos que reasignar.</p>
-                    @endif
+                        <p class="text-base-content/70">No tienes permiso para reasignar caballos.</p>
+                    @endcan
                 </div>
 
                 <div class="pt-4">

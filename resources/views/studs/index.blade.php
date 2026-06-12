@@ -39,11 +39,11 @@
 
             <x-session-alert />
 
-            @role('caretaker')
+            @can('studs.create')
                 <div class="mb-4">
                     <a href="{{ route('studs.create') }}" class="btn btn-success font-bold shadow-sm">Crear nuevo Stud</a>
                 </div>
-            @endrole
+            @endcan
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach ($studs as $stud)
@@ -60,17 +60,21 @@
                             <div class="card-actions justify-end mt-4 flex flex-wrap gap-2">
                                 <a href="{{ route('studs.show', $stud->id) }}" class="btn btn-sm btn-info">Ver</a>
 
-                                @role('caretaker|admin')
+                                @canany(['studs.edit', 'studs.delete'])
                                     @if(auth()->id() === $stud->owner_id)
-                                        <a href="{{ route('studs.edit', $stud->id) }}" class="btn btn-sm btn-warning">Editar</a>
-                                        <div>
-                                            <button class="btn btn-sm btn-error" onclick="document.getElementById('modal_stud_destroy_{{ $stud->id }}').showModal()">Eliminar</button>
-                                            <x-delete-modal :id="'modal_stud_destroy_' . $stud->id" :action="route('studs.destroy', $stud->id)" body="¿Estás seguro de que deseas eliminar este stud? Esta acción no se puede deshacer." />
-                                        </div>
+                                        @can('studs.edit')
+                                            <a href="{{ route('studs.edit', $stud->id) }}" class="btn btn-sm btn-warning">Editar</a>
+                                        @endcan
+                                        @can('studs.delete')
+                                            <div>
+                                                <button class="btn btn-sm btn-error" onclick="document.getElementById('modal_stud_destroy_{{ $stud->id }}').showModal()">Eliminar</button>
+                                                <x-delete-modal :id="'modal_stud_destroy_' . $stud->id" :action="route('studs.destroy', $stud->id)" body="¿Estás seguro de que deseas eliminar este stud? Esta acción no se puede deshacer." />
+                                            </div>
+                                        @endcan
                                     @endif
-                                @endrole
+                                @endcanany
 
-                                @if(auth()->user()->hasRole('caretaker'))
+                                @can('studs.join')
                                     @php
                                         $isMember = $stud->caretakers->contains('id', auth()->id());
                                     @endphp
@@ -80,9 +84,9 @@
                                             <button type="submit" class="btn btn-sm btn-success">Unirse</button>
                                         </form>
                                     @endif
-                                @endif
+                                @endcan
 
-                                @if(auth()->user()->hasRole('boss'))
+                                @can('studs.hire')
                                     @php
                                         $contract = auth()->user()->contractedStuds()->where('stud_id', $stud->id)->first();
                                     @endphp
@@ -95,17 +99,21 @@
                                     @elseif($contract->pivot->status === 'pending')
                                         <button class="btn btn-sm btn-disabled">Solicitud Pendiente</button>
                                     @elseif($contract->pivot->status === 'accepted')
-                                        <form action="{{ route('studs.fire', $stud->id) }}" method="POST">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-error">Cancelar Contrato</button>
-                                        </form>
+                                        @can('studs.fire')
+                                            <form action="{{ route('studs.fire', $stud->id) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-error">Cancelar Contrato</button>
+                                            </form>
+                                        @else
+                                            <button class="btn btn-sm btn-disabled">Contrato Activo</button>
+                                        @endcan
                                     @elseif($contract->pivot->status === 'rejected')
                                         <form action="{{ route('studs.hire', $stud->id) }}" method="POST">
                                             @csrf
                                             <button type="submit" class="btn btn-sm btn-warning">Reenviar Solicitud</button>
                                         </form>
                                     @endif
-                                @endif
+                                @endcan
                             </div>
                         </div>
                     </div>

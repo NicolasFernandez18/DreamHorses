@@ -132,12 +132,21 @@
                             <label for="caretaker_id" class="label">
                                 <span class="label-text">Cuidador</span>
                             </label>
-                            <select name="caretaker_id" id="caretaker_id" class="select select-bordered w-full">
-                                <option disabled selected>Seleccione cuidador</option>
-                                @foreach ($caretakers as $caretaker)
-                                    <option value="{{ $caretaker->id }}">{{ $caretaker->name }}</option>
-                                @endforeach
-                            </select>
+
+                            @if (auth()->user()?->hasRole('caretaker'))
+                                <input type="hidden" name="caretaker_id" value="{{ auth()->id() }}">
+                                <input type="text" class="input input-bordered w-full" value="{{ auth()->user()->name }}" readonly />
+                            @else
+                                <select name="caretaker_id" id="caretaker_id" class="select select-bordered w-full">
+                                    <option disabled selected>Seleccione cuidador</option>
+                                    @foreach ($caretakers as $caretaker)
+                                        <option value="{{ $caretaker->id }}" {{ old('caretaker_id') == $caretaker->id ? 'selected' : '' }}>
+                                            {{ $caretaker->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            @endif
+
                             <x-input-error :messages="$errors->get('caretaker_id')" class="mt-2" />
                         </div>
 

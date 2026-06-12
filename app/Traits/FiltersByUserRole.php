@@ -30,13 +30,12 @@ trait FiltersByUserRole
         }
 
         if ($user->hasRole('caretaker')) {
-           
             return $query->whereHas('horse', function ($q) use ($user) {
                 $q->where('caretaker_id', $user->id);
             });
         }
 
-        return $query->whereRaw('1 = 0'); 
+        return $query;
     }
 
     public function getUserHorses()
@@ -57,8 +56,7 @@ trait FiltersByUserRole
             return Horse::where('caretaker_id', $user->id)->get();
         }
 
-        return collect(); 
+        return Horse::all();
     }
 }
-
 

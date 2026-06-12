@@ -36,12 +36,12 @@
                     Lista de Herrado
                 </h1>
                 <x-session-alert />
-                @role('caretaker|admin')
+                @can('blacksmiths.create')
                     <div class="flex justify-start">
                         <a href="{{ route('blacksmiths.create') }}" class="btn btn-success font-bold shadow-sm">Crear
                             Herrado</a>
                     </div>
-                @endrole
+                @endcan
             </div>
              <div class="p-6 md:p-2">
                 @if ($horseId)
@@ -57,9 +57,9 @@
                             <th class="p-4">Fecha</th>
                             <th class="p-4">Nombre del Herrero</th>
                             <th class="p-4">Tipo de Herradura</th>
-                            @role('caretaker|admin')
+                            @canany(['blacksmiths.edit', 'blacksmiths.delete'])
                                 <th class="p-4">Acciones</th>
-                            @endrole
+                            @endcanany
                         </tr>
                     </thead>
                     <tbody>
@@ -69,16 +69,20 @@
                                 <td class="p-4 whitespace-nowrap">{{ \Carbon\Carbon::parse($blacksmith->date)->format('d/m/Y') }}</td>
                                 <td class="p-4 whitespace-nowrap">{{ $blacksmith->name }}</td>
                                 <td class="p-4 whitespace-nowrap">{{ $blacksmith->horseshoe }}</td>
-                                <td class="p-4 flex flex-col md:flex-row gap-2">
-                                    @role('caretaker|admin')
+                                @canany(['blacksmiths.edit', 'blacksmiths.delete'])
+                                    <td class="p-4 flex flex-col md:flex-row gap-2">
+                                        @can('blacksmiths.edit')
                                         <a href="{{ route('blacksmiths.edit', $blacksmith->id) }}"
                                             class="btn btn-xs btn-warning">Editar</a>
-                                        <div>
-                                            <button class="btn btn-xs btn-error" onclick="document.getElementById('modal_blacksmith_{{ $blacksmith->id }}').showModal()">Eliminar</button>
-                                            <x-delete-modal :id="'modal_blacksmith_' . $blacksmith->id" :action="route('blacksmiths.destroy', $blacksmith->id)" />
-                                        </div>
-                                    @endrole
-                                </td>
+                                        @endcan
+                                        @can('blacksmiths.delete')
+                                            <div>
+                                                <button class="btn btn-xs btn-error" onclick="document.getElementById('modal_blacksmith_{{ $blacksmith->id }}').showModal()">Eliminar</button>
+                                                <x-delete-modal :id="'modal_blacksmith_' . $blacksmith->id" :action="route('blacksmiths.destroy', $blacksmith->id)" />
+                                            </div>
+                                        @endcan
+                                    </td>
+                                @endcanany
                             </tr>
                         @endforeach
                     </tbody>

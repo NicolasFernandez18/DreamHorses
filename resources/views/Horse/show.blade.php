@@ -79,13 +79,23 @@
                             {{ $horse->mother_name }}</p>
                         <p><span class="text-base-content/70 font-semibold">Cuidador:</span>
                             {{ $horse->caretaker->name ?? 'Sin cuidador' }}</p>
-                            <a href="{{ route('race.index', ['horse_id' => $horse->id]) }}" class="btn btn-sm btn-primary">Carreras</a>
-                            <a href="{{ route('vet-visits.index', ['horse_id' => $horse->id]) }}" class="btn btn-sm btn-primary">Visitas de veterinario</a>
-                            <a href="{{ route('training.index', ['horse_id' => $horse->id]) }}" class="btn btn-sm btn-primary">Entrenamientos</a>
-                             <a href="{{ route('expenses.index', ['horse_id' => $horse->id]) }}"
-                            class="btn btn-sm btn-primary">Gastos</a>
-                        <a href="{{ route('blacksmiths.index', ['horse_id' => $horse->id]) }}"
-                            class="btn btn-sm btn-primary">Herrero</a>
+                            @can('race.view')
+                                <a href="{{ route('race.index', ['horse_id' => $horse->id]) }}" class="btn btn-sm btn-primary">Carreras</a>
+                            @endcan
+                            @can('vet-visits.view')
+                                <a href="{{ route('vet-visits.index', ['horse_id' => $horse->id]) }}" class="btn btn-sm btn-primary">Visitas de veterinario</a>
+                            @endcan
+                            @can('training.view')
+                                <a href="{{ route('training.index', ['horse_id' => $horse->id]) }}" class="btn btn-sm btn-primary">Entrenamientos</a>
+                            @endcan
+                            @can('expenses.view')
+                                <a href="{{ route('expenses.index', ['horse_id' => $horse->id]) }}"
+                                    class="btn btn-sm btn-primary">Gastos</a>
+                            @endcan
+                            @can('blacksmiths.view')
+                                <a href="{{ route('blacksmiths.index', ['horse_id' => $horse->id]) }}"
+                                    class="btn btn-sm btn-primary">Herrero</a>
+                            @endcan
                     </div>
                 </div>
             </div>
@@ -95,19 +105,19 @@
                     class="btn btn-sm btn-ghost">←
                     Volver</a>
                 <div class="flex gap-2">
-                    @role('caretaker|admin|boss')
-                    <a href="{{ route('horses.edit', $horse->id) }}"
-                        class="btn btn-sm btn-warning"> Editar</a>
-                        @endrole
+                    @can('horses.edit')
+                        <a href="{{ route('horses.edit', $horse->id) }}"
+                            class="btn btn-sm btn-warning"> Editar</a>
+                    @endcan
 
-                        @role('boss|admin')
-                    <div>
-                        <button class="btn btn-sm btn-error" onclick="document.getElementById('modal_horse_{{ $horse->id }}').showModal()">
-                            Eliminar
-                        </button>
-                        <x-delete-modal :id="'modal_horse_' . $horse->id" :action="route('horses.destroy', $horse->id)" body="¿Estás seguro de eliminar este caballo? Esta acción es irreversible y se perderán todos los datos asociados." />
-                    </div>
-                       @endrole
+                    @can('horses.delete')
+                        <div>
+                            <button class="btn btn-sm btn-error" onclick="document.getElementById('modal_horse_{{ $horse->id }}').showModal()">
+                                Eliminar
+                            </button>
+                            <x-delete-modal :id="'modal_horse_' . $horse->id" :action="route('horses.destroy', $horse->id)" body="¿Estás seguro de eliminar este caballo? Esta acción es irreversible y se perderán todos los datos asociados." />
+                        </div>
+                    @endcan
                 </div>
                 
             </div>

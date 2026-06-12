@@ -35,7 +35,7 @@ $user = Auth::user();
             ->role('caretaker')
             ->get();
         } else {
-            $caretakers = collect(); 
+            $caretakers = User::role('caretaker')->get();
         }
 
         return view('caretakers.index', compact('caretakers'));
@@ -64,7 +64,9 @@ $user = Auth::user();
             ->get();
     }
     else {
-        $availableCaretakers = collect();
+        $availableCaretakers = User::role('caretaker')
+            ->where('id', '!=', $caretaker->id)
+            ->get();
     }
 
     return view('caretakers.show', compact('caretaker', 'availableCaretakers'));
@@ -73,11 +75,21 @@ $user = Auth::user();
 
     public function destroy(User $caretaker)
     {
-  
+        abort_unless(Auth::user()?->can('caretakers.delete'), 403);
+
+        $caretaker->horsesCaretaker()->update([
+            'caretaker_id' => null,
+        ]);
+
+        $caretaker->delete();
+
+        return redirect()->route('caretakers.index')->with('success', 'Cuidador eliminado correctamente.');
     }
 
     public function reassign(Request $request, User $caretaker)
    {
+    abort_unless(Auth::user()?->can('caretakers.reassign'), 403);
+
     $request->validate([
         'new_caretaker_id' => 'required|exists:users,id'
     ]);

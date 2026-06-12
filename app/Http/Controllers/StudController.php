@@ -157,7 +157,7 @@ public function store(StoreStudRequest $request)
     {
         /** @var \App\Models\User $user */
         $user = Auth::user();
-        if (!$user->hasRole('boss')) {
+        if (! $user->can('studs.hire')) {
             abort(403);
         }
 
@@ -190,7 +190,7 @@ public function fire(Stud $stud)
 {
     /** @var \App\Models\User $user */
     $user = Auth::user();
-    if (! $user->hasRole('boss')) abort(403);
+    if (! $user->can('studs.fire')) abort(403);
 
     $caretakerIds = $stud->caretakers->pluck('id');
 
@@ -205,6 +205,11 @@ public function fire(Stud $stud)
 
 public function respondToHireRequest(Request $request, Stud $stud, User $boss)
     {
+        $user = Auth::user();
+        if (! $user || ! $user->can('studs.respond')) {
+            abort(403);
+        }
+
         if (Auth::id() !== $stud->owner_id) {
             abort(403, 'No tienes permiso para realizar esta acción.');
         }
@@ -229,4 +234,3 @@ public function respondToHireRequest(Request $request, Stud $stud, User $boss)
 
 
 }
-

@@ -42,13 +42,13 @@
                         Calendario
                     </button>
                 </form>
-                @role('caretaker|admin')
-                <form action="{{ route('calendar.create') }}" method="get">
-                    <button type="submit" class="btn btn-success font-bold shadow-sm">
-                        Crear Evento
-                    </button>
+                @can('calendar.create')
+                    <form action="{{ route('calendar.create') }}" method="get">
+                        <button type="submit" class="btn btn-success font-bold shadow-sm">
+                            Crear Evento
+                        </button>
                     </form>
-                    @endrole
+                @endcan
                 </div>
              <div class="overflow-x-auto rounded-lg shadow-lg">
                 <table
@@ -61,9 +61,9 @@
                             <th class="p-4">Hora</th>
                             <th class="p-4">Tipo de Evento</th>
                             <th class="p-4">Descripción</th>
-                            @role('caretaker|boss|admin')
+                            @canany(['calendar.edit', 'calendar.delete'])
                                 <th class="p-4">Acciones</th>
-                            @endrole
+                            @endcanany
                         </tr>
 
                     </thead>
@@ -77,16 +77,20 @@
                                 <td class="p-4 whitespace-nowrap">{{ $event->event_time }}</td>
                                 <td class="p-4 whitespace-nowrap">{{ $event->category }}</td>
                                 <td class="p-4 max-w-xs break-words">{{ $event->description }}</td>
-                                <td class="p-4 flex flex-col md:flex-row gap-2">
-                                    @role('caretaker|boss|admin')
+                                @canany(['calendar.edit', 'calendar.delete'])
+                                    <td class="p-4 flex flex-col md:flex-row gap-2">
+                                        @can('calendar.edit')
                                         <a href="{{ route('calendar.edit', $event) }}"
                                             class="btn btn-xs btn-warning">Editar</a>
-                                        <div>
-                                            <button class="btn btn-xs btn-error" onclick="document.getElementById('modal_event_{{ $event->id }}').showModal()">Eliminar</button>
-                                            <x-delete-modal :id="'modal_event_' . $event->id" :action="route('calendar.destroy', $event)" />
-                                        </div>
-                                    @endrole
-                                </td>
+                                        @endcan
+                                        @can('calendar.delete')
+                                            <div>
+                                                <button class="btn btn-xs btn-error" onclick="document.getElementById('modal_event_{{ $event->id }}').showModal()">Eliminar</button>
+                                                <x-delete-modal :id="'modal_event_' . $event->id" :action="route('calendar.destroy', $event)" />
+                                            </div>
+                                        @endcan
+                                    </td>
+                                @endcanany
                             </tr>
                         @endforeach
                     </tbody>

@@ -110,14 +110,21 @@
 
                         <fieldset class="fieldset">
                             <legend class="text-base-content/80">Cuidador</legend>
-                            <select name="caretaker_id" class="select select-bordered w-full">
-                                @foreach ($caretakers as $user)
-                                    <option value="{{ $user->id }}"
-                                        {{ $horse->caretaker_id == $user->id ? 'selected' : '' }}>
-                                        {{ $user->name }}
-                                    </option>
-                                @endforeach
-                            </select>
+
+                            @if (auth()->user()?->hasRole('caretaker'))
+                                <input type="hidden" name="caretaker_id" value="{{ auth()->id() }}">
+                                <input type="text" class="input input-bordered w-full" value="{{ auth()->user()->name }}" readonly />
+                            @else
+                                <select name="caretaker_id" class="select select-bordered w-full">
+                                    @foreach ($caretakers as $user)
+                                        <option value="{{ $user->id }}"
+                                            {{ old('caretaker_id', $horse->caretaker_id) == $user->id ? 'selected' : '' }}>
+                                            {{ $user->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            @endif
+
                             <x-input-error :messages="$errors->get('caretaker_id')" class="mt-2" />
                         </fieldset>
                     </div>

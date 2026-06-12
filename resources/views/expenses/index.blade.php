@@ -77,13 +77,13 @@
                             </button>
                         </form>
                     </div>
-                    @role('caretaker|admin')
+                    @can('expenses.create')
                         <div class="flex">
                             <a href="{{ route('expenses.create') }}" class="btn btn-success font-bold">
                                 Nuevo Gasto
                             </a>
                         </div>
-                    @endrole
+                    @endcan
                     <div class="p-6 md:p-2">
                         @if ($horseId)
                             <a href="{{ route('horses.show', $horseId) }}" class="btn btn-sm btn-secondary mb-4">⬅
@@ -118,9 +118,9 @@
                                     @php $i++; @endphp
                                 @endforeach
 
-                                @role('caretaker|admin')
+                                @canany(['expenses.edit', 'expenses.delete'])
                                     <th class="p-4">Acciones</th>
-                                @endrole
+                                @endcanany
                             </tr>
                         </thead>
                         <tbody id="expenses-tbody">
@@ -133,17 +133,21 @@
                                     <td class="p-4">{{ $expense->description }}</td>
                                     <td class="p-4 text-success font-semibold text-end ">
                                         ${{ number_format($expense->amount, 2) }}</td>
-                                    <td class="p-4 flex gap-2">
-                                        @role('caretaker|admin')
+                                    @canany(['expenses.edit', 'expenses.delete'])
+                                        <td class="p-4 flex gap-2">
+                                            @can('expenses.edit')
                                             <a href="{{ route('expenses.edit', $expense->id) }}"
                                                 class="btn btn-xs btn-warning">Editar</a>
-                                            <div>
-                                                <button class="btn btn-xs btn-error"
-                                                    onclick="document.getElementById('modal_expense_{{ $expense->id }}').showModal()">Eliminar</button>
-                                                <x-delete-modal :id="'modal_expense_' . $expense->id" :action="route('expenses.destroy', $expense->id)" />
-                                            </div>
-                                        @endrole
-                                    </td>
+                                            @endcan
+                                            @can('expenses.delete')
+                                                <div>
+                                                    <button class="btn btn-xs btn-error"
+                                                        onclick="document.getElementById('modal_expense_{{ $expense->id }}').showModal()">Eliminar</button>
+                                                    <x-delete-modal :id="'modal_expense_' . $expense->id" :action="route('expenses.destroy', $expense->id)" />
+                                                </div>
+                                            @endcan
+                                        </td>
+                                    @endcanany
                                 </tr>
                             @empty
                                 <tr>
