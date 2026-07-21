@@ -69,7 +69,12 @@
                                                 Editar permisos
                                             </a>
                                         @else
-                                            <span class="text-xs text-base-content/60">Rol base del sistema</span>
+                                            <a href="{{ route('roles.edit', $role) }}" class="btn btn-outline btn-warning font-bold">
+                                                Editar permisos
+                                            </a>
+                                            <div class="mt-2 text-xs text-base-content/60">
+                                                Rol base del sistema. Solo se recomienda cambiar permisos.
+                                            </div>
                                         @endunless
                                     </td>
                                 </tr>

@@ -32,6 +32,11 @@
                 <div>
                     <h1 class="text-2xl sm:text-3xl font-bold">Editar rol</h1>
                     <p class="text-base-content/70">Ajusta los permisos del rol seleccionado.</p>
+                    @if ($isSystemRole)
+                        <p class="mt-2 text-sm text-warning">
+                            Este es un rol base del sistema. El nombre permanece fijo, pero sus permisos sí se pueden ajustar.
+                        </p>
+                    @endif
                 </div>
 
                 <x-session-alert />

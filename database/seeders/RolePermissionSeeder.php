@@ -35,7 +35,10 @@ class RolePermissionSeeder extends Seeder
             $roles[$roleName] = Role::firstOrCreate(
                 ['name' => $roleName, 'guard_name' => 'web']
             );
-            $roles[$roleName]->syncPermissions(PermissionCatalog::rolePermissions()[$roleName]);
+
+            if ($roles[$roleName]->wasRecentlyCreated) {
+                $roles[$roleName]->syncPermissions(PermissionCatalog::rolePermissions()[$roleName]);
+            }
         }
 
         $adminUser = User::updateOrCreate(
