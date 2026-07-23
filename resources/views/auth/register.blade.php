@@ -2,7 +2,15 @@
     <form method="POST" action="{{ route('register') }}">
         @csrf
 
-        <input type="hidden" name="role" value="{{ $role }}">
+        <input type="hidden" name="role" value="{{ old('role', $role ?? '') }}">
+
+        <div class="mb-4 rounded-lg border border-primary/20 bg-primary/5 p-4">
+            <p class="text-sm text-base-content/70">Rol seleccionado</p>
+            <p class="text-lg font-semibold text-primary">{{ $roleLabel ?? 'Sin seleccionar' }}</p>
+            <a href="{{ route('select-role') }}" class="text-sm text-primary hover:underline">
+                Cambiar rol
+            </a>
+        </div>
 
         <div>
             <label for="name" class="label">{{ __('Nombre') }}</label>

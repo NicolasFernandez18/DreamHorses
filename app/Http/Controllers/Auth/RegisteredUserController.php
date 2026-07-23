@@ -4,25 +4,64 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Support\Collection;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
-use App\Models\Caretaker; // Importar modelo cuidador
+use App\Models\Caretaker; 
+use Spatie\Permission\Models\Role;
+use Illuminate\Support\Str;
 
 
 class RegisteredUserController extends Controller
 {
+    private function registrationRoles(): Collection
+    {
+        return Role::query()
+            ->where('name', '!=', 'admin')
+            ->where('guard_name', 'web')
+            ->orderBy('name')
+            ->get()
+            ->map(function (Role $role) {
+                return (object) [
+                    'value' => $role->name,
+                    'label' => $this->roleLabel($role->name),
+                ];
+            });
+    }
+
+    private function roleLabel(string $roleName): string
+    {
+        return match ($roleName) {
+            'boss' => 'Jefe',
+            'caretaker' => 'Cuidador',
+            default => Str::of($roleName)->replace(['_', '-'], ' ')->title()->toString(),
+        };
+    }
+
     /**
      * Display the registration view.
      */
     public function create(Request $request): View
     {
+        $roles = $this->registrationRoles();
+        $selectedRole = $request->query('role');
+
+        if (! $selectedRole || ! $roles->contains('value', $selectedRole)) {
+            return view('auth.select-role', [
+                'roles' => $roles,
+            ]);
+        }
+
         return view('auth.register', [
-            'role' => $request->query('role')
+            'role' => $selectedRole,
+            'roleLabel' => $this->roleLabel($selectedRole),
+            'roles' => $roles,
         ]);
     }
 
@@ -37,7 +76,14 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'role' => ['required', 'in:boss,caretaker'],
+            'role' => [
+                'required',
+                'string',
+                Rule::exists('roles', 'name')->where(function ($query) {
+                    $query->where('guard_name', 'web')
+                        ->where('name', '!=', 'admin');
+                }),
+            ],
             'phone' => ['required', 'string', 'max:20'],
             'address' => ['required', 'string', 'max:255']
 
@@ -56,7 +102,6 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role,
             'phone' => $request->phone,
             'address' => $request->address
 

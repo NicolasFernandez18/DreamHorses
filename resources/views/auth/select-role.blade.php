@@ -1,10 +1,19 @@
 <x-guest-layout>
     <h2 class="text-2xl font-bold mb-6 text-center text-primary">Selecciona tu rol</h2>
+    <p class="text-sm text-base-content/70 text-center mb-6">
+        Elige el rol con el que vas a registrarte antes de completar tus datos.
+    </p>
 
     <div class="flex flex-col gap-4">
-        <a href="{{ route('register', ['role' => 'boss']) }}" class="btn btn-primary w-full">Jefe</a>
-        <a href="{{ route('register', ['role' => 'caretaker']) }}" class="btn btn-secondary w-full">Cuidador</a>
-       
+        @forelse ($roles as $role)
+            <a href="{{ route('register', ['role' => $role->value]) }}" class="btn btn-primary w-full">
+                {{ $role->label }}
+            </a>
+        @empty
+            <div class="alert alert-warning">
+                No hay roles disponibles para registro.
+            </div>
+        @endforelse
     </div>
 
     <div class="text-center mt-6">

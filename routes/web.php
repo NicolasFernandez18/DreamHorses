@@ -131,9 +131,8 @@ Route::middleware('auth')->group(function () {
 });
 
 /* Roles */
-Route::get('/select-role', function () {
-    return view('auth.select-role');
-})->name('select-role');
+Route::get('/select-role', [RegisteredUserController::class, 'create'])
+    ->name('select-role');
 
 Route::get('/register', [RegisteredUserController::class, 'create'])
     ->name('register');
